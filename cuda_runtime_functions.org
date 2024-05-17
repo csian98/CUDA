@@ -9,6 +9,35 @@
 #include <device_launch_parameters.h>
 #+end_src
 
+* GPU info
+#+begin_src C++
+cudaError_t cudaGetDeviceCount(int* count);
+cudaError_t cudaGetDeviceProperties(cudaDeviceProp* prop, int deviceID);
+#+end_src
+** cudaDeviceProp
+#+begin_src C++
+struct cudaDeviceProp {
+	// ...
+	char name[255];
+	int major;
+	int minor;
+	int multiProcessorCount;	// GPU's number of multiprocessor (# of SM)
+	int totalGlobalMem;			// GPU global memory size (byte)
+};
+
+#include "helper_cuda.h"
+inline int _ConvertSMVer2Cores(int major, int minor);	// core number per processor(SM)
+#+end_src
+
+* Kernel
+#+begin_src C++
+dim3 gridDim;
+dim3 blockDim;
+uint3 blockIdx;
+uint3 threadIdx;
+int warpSize;
+#+end_src
+
 * Management
 #+begin_src C++
 __host__ __device__ cudaError_t cudaDeviceSynchronize(void);

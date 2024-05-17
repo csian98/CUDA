@@ -39,6 +39,16 @@
 __host__ int main(int argc, char* argv[]) {
 // 	std::terminate_handler default_terminate =
 //	std::set_terminate(&custom_terminate_fnct);
+
+	int ncpus, ngpus;
+	ncpus = sysconf(_SC_NPROCESSORS_ONLN);
+	// ncpus = std::thread::hardware_concurrency();
+	
+	if (auto error = cudaGetDeviceCount(&ngpus) != cudaSuccess) {
+		std::cerr << cudaGetErrorName(error) << std::endl;
+		exit(1);
+	} 
+	
 	void *d_ptr, *h_ptr;
 	size_t allocate = 4096;
 
