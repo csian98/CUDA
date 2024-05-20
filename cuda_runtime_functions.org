@@ -41,6 +41,8 @@ int warpSize;
 * Management
 #+begin_src C++
 __host__ __device__ cudaError_t cudaDeviceSynchronize(void);
+
+void __syncthreads(void);		// threads in block synchronize
 #+end_src
 
 * Memory
