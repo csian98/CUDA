@@ -1,5 +1,5 @@
 /**
- * @file		main.cu
+ * @File		main.cu
  * @brief		
  * @author		Jeong Hoon (Sian) Choi
  * @version 	1.0.0
@@ -94,10 +94,10 @@ static const int block_size = 32;
 
 template <typename T>
 __global__ void cuda_kernel(const T* a, const T* b, T* c, const int n, const int m, const int k) {
-	int row = blockDim.x * blockIdx.x + threadIdx.x;
-	int col = blockDim.y * blockIdx.y + threadIdx.y;
-	int local_row = threadIdx.x;
-	int local_col = threadIdx.y;
+	int col = blockDim.x * blockIdx.x + threadIdx.x;
+	int row = blockDim.y * blockIdx.y + threadIdx.y;
+	int local_col = threadIdx.x;
+	int local_row = threadIdx.y;
 	
 	__shared__ T partial_a[block_size][block_size];
 	__shared__ T partial_b[block_size][block_size];
