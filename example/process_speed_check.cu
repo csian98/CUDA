@@ -31,6 +31,9 @@
 #include <algorithm>
 #include <numeric>
 
+#include <random>
+#include <cmath>
+
 #include <string_view>
 #include <string>
 #include <vector>
@@ -51,11 +54,11 @@
 // }
 
 template <typename T>
-bool check_matrix(const T* a, const T* b, const int n, const int m, double tolerance = 1e-5) {
+bool check_matrix(const T* a, const T* b, const int n, const int m, const double tolerance = 1e-5) {
 	for (int i = 0; i < n; ++i) {
 		for (int j = 0; j < m; ++j) {
 			int index = i * m + j;
-			if (std::abs(a[index] - b[index]) > tolerance) return false;
+			if (std::fabs(a[index] - b[index]) > tolerance) return false;
 		}
 	}
 	return true;
@@ -112,14 +115,14 @@ __global__ void cuda_kernel(const T* a, const T* b, T* c, const int n, const int
 			partial_a[local_row][local_col] = a[row * k + (stride + local_col)];
 
 		if (col >= n || stride + local_col >= k)
-			partial_b[local_row][local_col] = 0;
+			partial_b[local_col][local_row] = 0;	// transpose (bank-confilic minimize)
 		else
-			partial_b[local_row][local_col] = b[(stride + local_row) * m + col];
+			partial_b[local_col][local_row] = b[(stride + local_row) * m + col];	// transpose
 			
 		__syncthreads();
 
 		for (int i = 0; i < block_size; ++i) {
-			value += partial_a[local_row][local_col] * partial_b[local_row][local_col];
+			value += partial_a[local_row][local_col] * partial_b[local_col][local_row];	// partial_b transpose
 		}
 
 		__syncthreads();
@@ -132,6 +135,10 @@ __global__ void cuda_kernel(const T* a, const T* b, T* c, const int n, const int
 int main(int argc, char* argv[]) {
 //	cudaDeviceSetCacheConfig(cudaFuncCachePreferShared);
 	sian::Timer timer(3);
+
+	std::random_device rd;
+	std::mt19937 engine(rd());
+	std::uniform_real_distribution<double> distribution(-1.0, 1.0);
 	
 	const int n = 2048;
 	const int k = 2048;
@@ -142,6 +149,9 @@ int main(int argc, char* argv[]) {
 	double* c1 = new double[n * m];
 	double* c2 = new double[n * m];
 	double* c3 = new double[n * m];
+
+	for (int i = 0; i < n * k; ++i) a[i] = distribution(engine);
+	for (int i = 0; i < k * m; ++i) b[i] = distribution(engine);
 
 	std::cout << "####\nMatrix Multiply Parallel Calculation\n####\n" << std::endl;
 	

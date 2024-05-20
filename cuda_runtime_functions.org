@@ -38,11 +38,25 @@ uint3 threadIdx;
 int warpSize;
 #+end_src
 
-* Management
+* Synchronize
 #+begin_src C++
+// Barrier
 __host__ __device__ cudaError_t cudaDeviceSynchronize(void);
-
 void __syncthreads(void);		// threads in block synchronize
+void __syncwarp(void);		// threads in warp synchronize
+
+// Mutual Exclusion
+int atomicAdd(int* addr, int val);
+int atomicSub(int* addr, int val);
+int atomicExch(int* addr, int val);
+int atomicMin(int* addr, int val);
+int atomicMax(int* addr, int val);
+unsigned int atomicInc(unsigned int* addr, int val);
+unsigned int atomicDec(unsigned int* addr, int val);
+int atomicCAS(int* addr, int compare, int val);
+int atomicAnd(int* addr, int val);
+int atomicOr(int* addr, int val);
+int atomicXor(int* addr, int val);
 #+end_src
 
 * Memory
@@ -159,6 +173,11 @@ __host__ __device__ const char* cudaGetErrorName(cudaError_t error);
 #+end_src
 
 * NVCC
-#+begin_src bash
+#+begin_src shell
 nvcc --maxrregcount #	maximum register number each thread can use
+#+end_src
+
+* Nsight Compute
+#+begin_src shell
+sudo ncu -o profile <exec>
 #+end_src
